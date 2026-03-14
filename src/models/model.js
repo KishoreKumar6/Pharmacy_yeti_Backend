@@ -25,6 +25,14 @@ const medicationSchema = new mongoose.Schema(
       required: true,
       enum: ['full', 'half'],
     },
+    status: {
+      type: String,
+      enum: ['hold', 'confirm', 'cancel'],
+      default: 'hold',
+    },
+    deliveryDate: {
+      type: Date,
+    },
     days: {
       type: Number,
       required: true,
@@ -65,6 +73,7 @@ const customerSchema = new mongoose.Schema(
         type: String,
         required: true,
         trim: true,
+        unique: true,
       },
       address: {
         type: String,

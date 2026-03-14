@@ -3,6 +3,7 @@ import {
   deleteCustomer,
   getAllCustomers,
   getAllMedicines,
+  getCustomerByPhone,
   updateCustomer,
   upsertMedicines,
 } from '../services/service.js'
@@ -11,11 +12,12 @@ const ALLOWED_GENDER = ['male', 'female', 'other']
 const ALLOWED_TYPES = ['tablet', 'syrup', 'capsule']
 const ALLOWED_DOSAGE = ['full', 'half']
 const ALLOWED_FREQUENCY = ['morning', 'afternoon', 'evening', 'night']
+const ALLOWED_STATUS = ['hold', 'confirm', 'cancel']
 
 const isNonEmptyString = (value) => typeof value === 'string' && value.trim().length > 0
 
-const normalizeDate = (days) => {
-  const renewalDate = new Date()
+const normalizeDate = (days, baseDate = null) => {
+  const renewalDate = baseDate ? new Date(baseDate) : new Date()
   renewalDate.setHours(0, 0, 0, 0)
   renewalDate.setDate(renewalDate.getDate() + Number(days))
   return renewalDate
@@ -87,6 +89,17 @@ const validateAndNormalizePayload = (personalDetail, medicationDetails) => {
       return { error: 'Days must be a valid number greater than 0' }
     }
 
+    const status = row.status ? row.status : 'hold'
+    const deliveryDate = row.deliveryDate ? new Date(row.deliveryDate) : null
+
+    if (row.deliveryDate && Number.isNaN(deliveryDate?.getTime())) {
+      return { error: 'Delivery date is invalid' }
+    }
+
+    if (row.status && !ALLOWED_STATUS.includes(row.status)) {
+      return { error: 'Status must be hold, confirm or cancel' }
+    }
+
     const totalUnits = calculateTotalUnits({
       dosage: row.dosage,
       days,
@@ -98,9 +111,11 @@ const validateAndNormalizePayload = (personalDetail, medicationDetails) => {
       type: row.type,
       frequency: row.frequency,
       dosage: row.dosage,
+      status,
       days,
       totalUnits,
-      renewalDate: normalizeDate(days),
+      deliveryDate,
+      renewalDate: normalizeDate(days, deliveryDate),
     })
   }
 
@@ -134,6 +149,11 @@ export const createCustomerHandler = async (req, res, next) => {
 
     if (error) {
       return res.status(400).json({ message: error })
+    }
+
+    const existing = await getCustomerByPhone(payload.personalDetail.phoneNo)
+    if (existing) {
+      return res.status(409).json({ message: 'Customer with this phone number already exists' })
     }
 
     await upsertMedicines(validatedRows.map((row) => row.medicineName))

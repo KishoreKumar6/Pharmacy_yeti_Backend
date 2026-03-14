@@ -6,6 +6,11 @@ export const createCustomer = async (customerPayload) => {
   return customer
 }
 
+export const getCustomerByPhone = async (phoneNo) => {
+  const customer = await Customer.findOne({ 'personalDetail.phoneNo': phoneNo }).lean()
+  return customer
+}
+
 export const getAllCustomers = async () => {
   const customers = await Customer.find().sort({ createdAt: -1 }).lean()
   return customers
