@@ -14,6 +14,10 @@ app.use(
 )
 app.use(express.json())
 
+app.get('/', (_req, res) => {
+  res.status(200).json({ message: 'Pharmacy backend API is running' })
+})
+
 app.get('/api/health', (_req, res) => {
   res.status(200).json({ message: 'Server is running' })
 })
