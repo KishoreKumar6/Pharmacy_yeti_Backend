@@ -33,4 +33,7 @@ jobs:
           docker rm -f pharmacy-backend || true
           docker run -d -p 5000:5000 --name pharmacy-backend \
             -e MONGODB_URI=${{ secrets.MONGODB_URI }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -e ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }} \
+            -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
             ${{ secrets.DOCKER_USERNAME }}/pharmacy-backend:latest
