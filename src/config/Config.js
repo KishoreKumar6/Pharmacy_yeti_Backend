@@ -4,3 +4,7 @@ dotenv.config()
 
 export const PORT = process.env.PORT || 5000
 export const MONGODB_URI = process.env.MONGODB_URI || ''
+export const JWT_SECRET = process.env.JWT_SECRET || ''
+export const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d'
+export const ADMIN_USERNAME = process.env.ADMIN_USERNAME || ''
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || ''
